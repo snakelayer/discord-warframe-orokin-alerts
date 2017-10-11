@@ -128,7 +128,7 @@ func (ws *WorldState) getOrokinAlerts() []*Alert {
 
 		for _, item := range missionReward.Items {
 			if _, ok := orokinItems[item]; ok {
-				log.WithField("alert", alert).Info("found orokin alert")
+				log.WithField("alert", alert).WithField("item", item).Info("found orokin alert")
 				orokinAlerts = append(orokinAlerts, alert)
 				break
 			}
