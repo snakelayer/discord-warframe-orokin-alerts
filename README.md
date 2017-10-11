@@ -1,5 +1,7 @@
 # discord-warframe-orokin-alerts
-Notifies Discord channels of Orokin alerts
+Notifies Discord channels of Orokin alerts.
+
+Uses data from [WFCD/warframe-worldstate-data](https://github.com/WFCD/warframe-worldstate-data).
 
 ## Usage:
 
