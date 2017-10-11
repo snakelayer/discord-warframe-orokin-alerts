@@ -93,7 +93,7 @@ func getMinutesUntil(expire string) time.Duration {
 
 	expireDate := time.Unix(expireMillis/1000, 0)
 
-	return expireDate.Sub(time.Now()).Round(time.Minute)
+	return expireDate.Sub(time.Now()).Round(time.Second)
 }
 
 type WorldState struct {
