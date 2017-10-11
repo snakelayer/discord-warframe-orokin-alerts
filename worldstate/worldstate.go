@@ -124,9 +124,12 @@ func (ws *WorldState) refresh() error {
 func (ws *WorldState) getOrokinAlerts() []*Alert {
 	orokinAlerts := []*Alert{}
 	for _, alert := range ws.Alerts {
-		missionReward := alert.MissionInfo.MissionReward
+		items := alert.MissionInfo.MissionReward.Items
+		if items == nil {
+			continue
+		}
 
-		for _, item := range missionReward.Items {
+		for _, item := range items {
 			if _, ok := orokinItems[item]; ok {
 				log.WithField("alert", alert).WithField("item", item).Info("found orokin alert")
 				orokinAlerts = append(orokinAlerts, alert)
