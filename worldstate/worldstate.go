@@ -79,21 +79,27 @@ func (alert *Alert) PrettyPrint() string {
 	buffer.WriteString(strconv.Itoa(alert.MissionInfo.MinEnemyLevel))
 	buffer.WriteString("-")
 	buffer.WriteString(strconv.Itoa(alert.MissionInfo.MaxEnemyLevel))
+	buffer.WriteString(" | ")
+	buffer.WriteString("Until " + getExpireTime(alert.Expiry.Date.NumberLong).Format("15:04"))
 	buffer.WriteString(" *(" + getMinutesUntil(alert.Expiry.Date.NumberLong).String() + ")*")
 
 	return buffer.String()
 }
 
-func getMinutesUntil(expire string) time.Duration {
+func getExpireTime(expire string) time.Time {
 	expireMillis, err := strconv.ParseInt(expire, 10, 64)
 	if err != nil {
 		log.WithError(err).WithField("expire", expire).Error("could not convert time")
-		return -1
+		return time.Unix(0, 0)
 	}
 
-	expireDate := time.Unix(expireMillis/1000, 0)
+	return time.Unix(expireMillis/1000, 0)
+}
 
-	return expireDate.Sub(time.Now()).Round(time.Second)
+func getMinutesUntil(expire string) time.Duration {
+	expireTime := getExpireTime(expire)
+
+	return expireTime.Sub(time.Now()).Round(time.Second)
 }
 
 type WorldState struct {
@@ -128,6 +134,8 @@ func (ws *WorldState) getOrokinAlerts() []*Alert {
 		if items == nil {
 			continue
 		}
+		//orokinAlerts = append(orokinAlerts, alert)
+		//break
 
 		for _, item := range items {
 			if _, ok := orokinItems[item]; ok {
