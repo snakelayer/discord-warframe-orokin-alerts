@@ -68,7 +68,13 @@ func (discord *Discord) initializeWarframeChannels() {
 
 func (discord *Discord) Broadcast(message string) {
 	for _, channelId := range discord.warframeChannelIds {
-		discord.session.ChannelMessageSend(channelId, message)
+		messageResponse, _ := discord.session.ChannelMessageSendTTS(channelId, "potato alert")
+
+		if messageResponse != nil && messageResponse.ID != "" {
+			discord.session.ChannelMessageEdit(channelId, messageResponse.ID, message)
+		} else {
+			discord.session.ChannelMessageSend(channelId, message)
+		}
 	}
 }
 
