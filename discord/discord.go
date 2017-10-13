@@ -78,6 +78,14 @@ func (discord *Discord) Broadcast(message string) {
 	}
 }
 
+func (discord *Discord) SetAlertStatus() {
+	discord.session.UpdateStatus(0, "active alert!")
+}
+
+func (discord *Discord) ResetStatus() {
+	discord.session.UpdateStatus(0, "")
+}
+
 func (discord *Discord) Close() {
 	discord.session.Close()
 }

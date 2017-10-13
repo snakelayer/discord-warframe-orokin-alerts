@@ -50,12 +50,14 @@ func pollOrokinAlerts(ws *worldstate.WorldState, discord *discord.Discord) {
 					log.WithField("alert", alert).Info("new alert")
 					seenAlertIds[alert.GetId()] = true
 					discord.Broadcast(alert.PrettyPrint())
+					discord.SetAlertStatus()
 				}
 			}
 
 			if alerts == nil {
 				log.Info("reset seen alerts")
 				seenAlertIds = map[string]bool{}
+				discord.ResetStatus()
 			}
 		}
 
