@@ -48,8 +48,12 @@ type Alert struct {
 		MaxWaveNum     int     `json:"maxWaveNum"`
 		MinEnemyLevel  int     `json:"minEnemyLevel"`
 		MissionReward  struct {
-			Credits int      `json:"credits"`
-			Items   []string `json:"items"`
+			Credits      int      `json:"credits"`
+			Items        []string `json:"items"`
+			CountedItems []struct {
+				ItemCount int    `json:"ItemCount"`
+				ItemType  string `json:"ItemType"`
+			} `json:"countedItems"`
 		} `json:"missionReward"`
 		MissionType string `json:"missionType"`
 		Seed        int    `json:"seed"`
@@ -57,7 +61,8 @@ type Alert struct {
 }
 
 func (alert *Alert) String() string {
-	return fmt.Sprintf("{Id:%v}", alert.GetId())
+	reward := alert.MissionInfo.MissionReward
+	return fmt.Sprintf("{Id:%v, Items:%v, CountedItems:%v}", alert.GetId(), reward.Items, reward.CountedItems)
 }
 
 func (alert *Alert) GetId() string {
@@ -130,6 +135,8 @@ func (ws *WorldState) refresh() error {
 func (ws *WorldState) getOrokinAlerts() []*Alert {
 	orokinAlerts := []*Alert{}
 	for _, alert := range ws.Alerts {
+		log.WithField("alert", alert).Debug("check alert")
+
 		items := alert.MissionInfo.MissionReward.Items
 		if items == nil {
 			continue
