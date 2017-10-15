@@ -13,9 +13,10 @@ Uses data from [WFCD/warframe-worldstate-data](https://github.com/WFCD/warframe-
 ### Running the bot
 
 * first compile (`go build -o dwf-bot`)
-* then run (`./dwf-bot -token <TOKEN> -role <ROLENAME> -debug`)
-  * `-token` is mandatory: TOKEN is from the app bot user that you created earlier.
+* then run (`./dwf-bot -token <TOKEN> -role <ROLENAME> -tts -debug`)
+  * `-token` is mandatory: TOKEN is from the app bot user that you created earlier
   * `-role` is optional: If specified, the bot will @mention the given ROLENAME when broadcasting alerts
+  * `-tts` is optional: If enabled, the bot also sends a TTS message with each alert notification
   * `-debug` is optional: Increases logging output
 
-The bot will periodically (each minute) poll for alerts that contain the Orokin Catalyst or Orokin Reactor blueprint reward. When it finds one, it will broadcast a message to your Warframe channels. That is, any channel with the word "warframe", "orokin", or "potato" in the name. Any user with TTS enabled with also get a text-to-speech notification.
+The bot will periodically (each minute) poll for alerts that contain the Orokin Catalyst or Orokin Reactor blueprint reward. When it finds one, it will broadcast a message to all of your Warframe channels. That is, any channel with the word "warframe", "orokin", or "potato" in the name. If TTS is enabled on the bot, users with TTS enabled will also get text-to-speech notifications.
