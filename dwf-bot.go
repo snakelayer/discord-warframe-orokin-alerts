@@ -15,8 +15,15 @@ import (
 
 func main() {
 	var token string
+	var isDebug bool
+
 	flag.StringVar(&token, "token", "", "discord bot token")
+	flag.BoolVar(&isDebug, "debug", false, "enable debug")
 	flag.Parse()
+
+	if isDebug {
+		log.SetLevel(log.DebugLevel)
+	}
 
 	if token == "" {
 		log.Fatal("missing bot token")
