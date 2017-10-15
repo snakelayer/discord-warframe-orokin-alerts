@@ -85,7 +85,7 @@ func (alert *Alert) PrettyPrint() string {
 	buffer.WriteString("-")
 	buffer.WriteString(strconv.Itoa(alert.MissionInfo.MaxEnemyLevel))
 	buffer.WriteString(" | ")
-	buffer.WriteString("Until " + getExpireTime(alert.Expiry.Date.NumberLong).Format("15:04"))
+	buffer.WriteString("Until " + getExpireTime(alert.Expiry.Date.NumberLong).Format("15:04 MST"))
 	buffer.WriteString(" *(" + getMinutesUntil(alert.Expiry.Date.NumberLong).String() + ")*")
 
 	return buffer.String()
