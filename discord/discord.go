@@ -16,11 +16,12 @@ type Guild struct {
 
 type Discord struct {
 	session *discordgo.Session
+	tts     bool
 
 	warframeGuilds []Guild
 }
 
-func New(token string) *Discord {
+func New(token string, tts bool) *Discord {
 	session, err := discordgo.New("Bot " + token)
 	if err != nil {
 		log.WithError(err).Fatal("could not initialize discord")
@@ -33,6 +34,7 @@ func New(token string) *Discord {
 
 	return &Discord{
 		session:        session,
+		tts:            tts,
 		warframeGuilds: []Guild{},
 	}
 }
@@ -118,10 +120,14 @@ func (discord *Discord) Broadcast(message string) {
 		}
 
 		for _, channelId := range guild.warframeChannelIds {
-			messageResponse, _ := discord.session.ChannelMessageSendTTS(channelId, "potato alert")
+			if discord.tts {
+				messageResponse, _ := discord.session.ChannelMessageSendTTS(channelId, "potato alert")
 
-			if messageResponse != nil && messageResponse.ID != "" {
-				discord.session.ChannelMessageEdit(channelId, messageResponse.ID, fullMessage)
+				if messageResponse != nil && messageResponse.ID != "" {
+					discord.session.ChannelMessageEdit(channelId, messageResponse.ID, fullMessage)
+				} else {
+					discord.session.ChannelMessageSend(channelId, fullMessage)
+				}
 			} else {
 				discord.session.ChannelMessageSend(channelId, fullMessage)
 			}

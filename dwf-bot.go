@@ -16,10 +16,12 @@ import (
 func main() {
 	var token string
 	var roleName string
+	var tts bool
 	var isDebug bool
 
 	flag.StringVar(&token, "token", "", "discord bot token")
 	flag.StringVar(&roleName, "role", "", "role to @mention")
+	flag.BoolVar(&tts, "tts", false, "enable tts")
 	flag.BoolVar(&isDebug, "debug", false, "enable debug")
 
 	flag.Parse()
@@ -32,7 +34,7 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	discord := discord.New(token)
+	discord := discord.New(token, tts)
 	discord.Initialize(roleName)
 
 	ws := worldstate.New()
