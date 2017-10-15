@@ -1,6 +1,7 @@
 package discord
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -8,10 +9,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type Guild struct {
+	warframeChannelIds []string
+	warframeRoleId     string
+}
+
 type Discord struct {
 	session *discordgo.Session
 
-	warframeChannelIds []string
+	warframeGuilds []Guild
 }
 
 func New(token string) *Discord {
@@ -26,16 +32,16 @@ func New(token string) *Discord {
 	}
 
 	return &Discord{
-		session:            session,
-		warframeChannelIds: []string{},
+		session:        session,
+		warframeGuilds: []Guild{},
 	}
 }
 
-func (discord *Discord) Initialize() {
-	discord.initializeWarframeChannels()
+func (discord *Discord) Initialize(roleName string) {
+	discord.initializeWarframeGuildChannels(roleName)
 }
 
-func (discord *Discord) initializeWarframeChannels() {
+func (discord *Discord) initializeWarframeGuildChannels(roleName string) {
 	guilds, err := discord.session.UserGuilds(100, "", "")
 	if err != nil {
 		log.WithError(err).Fatal("could not retrieve server list")
@@ -50,6 +56,9 @@ func (discord *Discord) initializeWarframeChannels() {
 			continue
 		}
 
+		wfGuild := Guild{
+			warframeChannelIds: []string{},
+		}
 		for _, channel := range channels {
 			log.WithField("channel", channel).Debug("channel data")
 
@@ -60,20 +69,62 @@ func (discord *Discord) initializeWarframeChannels() {
 
 			if isWarframeChannel(channel.Name) {
 				log.WithField("channel", channel).Info("using warframe channel")
-				discord.warframeChannelIds = append(discord.warframeChannelIds, channel.ID)
+				wfGuild.warframeChannelIds = append(wfGuild.warframeChannelIds, channel.ID)
 			}
 		}
+
+		if len(wfGuild.warframeChannelIds) == 0 {
+			continue
+		}
+
+		if roleName != "" {
+			roleId, err := discord.getMentionRoleIdByName(guild.ID, roleName)
+			if err != nil {
+				log.WithError(err).WithField("role", roleName).Warn("unable to @mention role")
+			}
+
+			wfGuild.warframeRoleId = roleId
+		}
+
+		discord.warframeGuilds = append(discord.warframeGuilds, wfGuild)
 	}
 }
 
-func (discord *Discord) Broadcast(message string) {
-	for _, channelId := range discord.warframeChannelIds {
-		messageResponse, _ := discord.session.ChannelMessageSendTTS(channelId, "potato alert")
+func (discord *Discord) getMentionRoleIdByName(guildId string, roleName string) (string, error) {
+	roles, err := discord.session.GuildRoles(guildId)
+	if err != nil {
+		log.WithError(err).Error("could not obtain server roles")
+		return "", err
+	}
 
-		if messageResponse != nil && messageResponse.ID != "" {
-			discord.session.ChannelMessageEdit(channelId, messageResponse.ID, message)
+	for _, role := range roles {
+		log.WithField("role", role).Debug("examine role")
+		if role.Name == roleName {
+			log.WithField("name", roleName).WithField("id", role.ID).Info("found mention role")
+			return role.ID, nil
+		}
+	}
+
+	return "", errors.New("no role found with name " + roleName)
+}
+
+func (discord *Discord) Broadcast(message string) {
+	for _, guild := range discord.warframeGuilds {
+		var fullMessage string
+		if guild.warframeRoleId != "" {
+			fullMessage = "<@&" + guild.warframeRoleId + "> " + message
 		} else {
-			discord.session.ChannelMessageSend(channelId, message)
+			fullMessage = message
+		}
+
+		for _, channelId := range guild.warframeChannelIds {
+			messageResponse, _ := discord.session.ChannelMessageSendTTS(channelId, "potato alert")
+
+			if messageResponse != nil && messageResponse.ID != "" {
+				discord.session.ChannelMessageEdit(channelId, messageResponse.ID, fullMessage)
+			} else {
+				discord.session.ChannelMessageSend(channelId, fullMessage)
+			}
 		}
 	}
 }

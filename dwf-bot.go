@@ -15,22 +15,25 @@ import (
 
 func main() {
 	var token string
+	var roleName string
 	var isDebug bool
 
 	flag.StringVar(&token, "token", "", "discord bot token")
+	flag.StringVar(&roleName, "role", "", "role to @mention")
 	flag.BoolVar(&isDebug, "debug", false, "enable debug")
-	flag.Parse()
 
-	if isDebug {
-		log.SetLevel(log.DebugLevel)
-	}
+	flag.Parse()
 
 	if token == "" {
 		log.Fatal("missing bot token")
 	}
 
+	if isDebug {
+		log.SetLevel(log.DebugLevel)
+	}
+
 	discord := discord.New(token)
-	discord.Initialize()
+	discord.Initialize(roleName)
 
 	ws := worldstate.New()
 
