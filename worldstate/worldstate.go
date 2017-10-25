@@ -123,6 +123,7 @@ func (ws *WorldState) refresh() error {
 	}
 	defer resp.Body.Close()
 
+	ws.Alerts = nil
 	err = json.NewDecoder(resp.Body).Decode(ws)
 	if err != nil {
 		log.WithError(err).Error("error decoding worldstate data to json")
